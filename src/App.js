@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from "axios"
+import Pagination from "./Pagination";
 import './App.css';
 
 function App() {
   const [data, setData] = useState([])
+
+  //   ******** pagination   *********
+  const [currentPage, setCurrentPage] = useState(1)
+  const [postPerPage] = useState(25)
 
 
   // Fetching data from https://fetch-hiring.s3.amazonaws.com/hiring.json
@@ -21,6 +26,18 @@ function App() {
   const newArray = data.filter(item => item.name !== "");
   const secondArray = newArray.filter(items => items.name !== null);
   const sortArray = secondArray.sort(function (a, b) { return a.listId - b.listId });
+
+  // // get current post paginate
+  const indexOfLastPost = currentPage * postPerPage;
+  const indexOfFirstPost = indexOfLastPost - postPerPage;
+  const currentPost = sortArray.slice(indexOfFirstPost, indexOfLastPost);
+
+  // change page
+  const paginate = pageNumer => {
+    setCurrentPage(pageNumer)
+  }
+
+
   return (
 
     <div className="tableDiv">
@@ -31,7 +48,7 @@ function App() {
             <th>Name</th>
           </tr>
           {/* map data */}
-          {sortArray.map((item, i) => (
+          {currentPost.map((item, i) => (
             <tr key={i}>
               <td>{item.listId}</td>
               <td>{item.name}</td>
@@ -39,6 +56,12 @@ function App() {
           ))}
         </tbody>
       </table>
+      <hr></hr>
+      <Pagination
+        postPerPage={postPerPage}
+        totalPost={sortArray.length}
+        paginate={paginate}
+      />
     </div>
   );
 }
